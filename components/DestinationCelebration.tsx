@@ -26,9 +26,10 @@ export default function DestinationCelebration({
       useNativeDriver: true,
     }).start();
 
+    const animations: Animated.CompositeAnimation[] = [];
     // Bounce animations for icons
     const createBounce = (anim: Animated.Value, delay: number) => {
-      Animated.loop(
+      const animation = Animated.loop(
         Animated.sequence([
           Animated.timing(anim, {
             toValue: -10,
@@ -42,13 +43,19 @@ export default function DestinationCelebration({
             useNativeDriver: true,
           }),
         ])
-      ).start();
+      );
+      animations.push(animation);
+      animation.start();
     };
 
     createBounce(bounceAnim1, 0);
     createBounce(bounceAnim2, 100);
     createBounce(bounceAnim3, 200);
-  }, []);
+
+    return () => {
+      animations.forEach((anim) => anim.stop());
+    };
+  }, [bounceAnim1, bounceAnim2, bounceAnim3, scaleAnim]);
 
   return (
     <View style={styles.overlay}>

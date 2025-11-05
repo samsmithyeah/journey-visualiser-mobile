@@ -28,9 +28,11 @@ A React Native/Expo mobile app for tracking journey progress in real-time with a
    ```
 
 2. Configure environment variables:
-   - Update the `.env` file with your Google Maps API key
+   - Create a `.env` file in the project root with your Google Maps API key:
+     ```
+     EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your_api_key_here
+     ```
    - Make sure the following APIs are enabled in Google Cloud Console:
-     - Maps JavaScript API
      - Places API
      - Directions API
      - Geocoding API
@@ -50,8 +52,6 @@ A React Native/Expo mobile app for tracking journey progress in real-time with a
    ```
 
    This will build the native app and start the development server.
-
-   See `DEV_BUILD_INSTRUCTIONS.md` for detailed build instructions for physical devices.
 
 ## Project Structure
 
@@ -97,12 +97,16 @@ To access the debug panel:
 2. Look for the "Debug mode" button (bottom-right corner)
 3. Tap to open the debug controls
 
-### Testing on Physical Device
+### Testing on physical device
 
-For best results, test location tracking on a physical device rather than a simulator:
+For best results, test location tracking on a physical device rather than a simulator.
 
-- iOS: Use Expo Go from the App Store
-- Android: Use Expo Go from the Play Store
+This app uses custom native code (expo-location) and requires a custom development build. Follow these steps:
+
+1. **For iOS**: Build and install the development build on your device using `npx expo run:ios --device`
+2. **For Android**: Build and install the development build on your device using `npx expo run:android --device`
+
+Note: This app cannot run in the standard Expo Go client due to custom native configurations.
 
 ## Building for Production
 
@@ -129,11 +133,10 @@ expo build:android
 - **Lucide React Native** - Icons
 - **Nunito Font** - Typography
 
-## API Keys
+## API keys
 
 This app requires a Google Maps API key with the following APIs enabled:
 
-- Maps JavaScript API
 - Places API
 - Directions API
 - Geocoding API

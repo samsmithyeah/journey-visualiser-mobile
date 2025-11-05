@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import {
   View,
   TextInput,
@@ -23,6 +23,7 @@ export default function DestinationSearch({ onDestinationSelect }: DestinationSe
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const { width } = useWindowDimensions();
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const responsiveStyles = useMemo(() => {
     const isSmallPhone = width < 360;
@@ -59,39 +60,54 @@ export default function DestinationSearch({ onDestinationSelect }: DestinationSe
     };
   }, [width]);
 
-  const handleInputChange = async (value: string) => {
-    setInputValue(value);
+  // Debounced effect for fetching predictions
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
 
-    if (!value.trim()) {
+    if (!inputValue.trim()) {
       setPredictions([]);
       setShowDropdown(false);
       return;
     }
 
-    try {
-      const results = await fetchAutocompletePredictions(value);
+    debounceTimer.current = setTimeout(async () => {
+      try {
+        const results = await fetchAutocompletePredictions(inputValue);
 
-      if (results && results.length > 0) {
-        const convertedPredictions: Prediction[] = results.map((prediction) => ({
-          description: prediction.description,
-          place_id: prediction.place_id,
-          structured_formatting: {
-            main_text: prediction.structured_formatting.main_text,
-            secondary_text: prediction.structured_formatting.secondary_text || '',
-          },
-        }));
+        if (results && results.length > 0) {
+          const convertedPredictions: Prediction[] = results.map((prediction) => ({
+            description: prediction.description,
+            place_id: prediction.place_id,
+            structured_formatting: {
+              main_text: prediction.structured_formatting.main_text,
+              secondary_text: prediction.structured_formatting.secondary_text || '',
+            },
+          }));
 
-        setPredictions(convertedPredictions);
-        setShowDropdown(true);
-      } else {
+          setPredictions(convertedPredictions);
+          setShowDropdown(true);
+        } else {
+          setPredictions([]);
+          setShowDropdown(false);
+        }
+      } catch (error) {
+        console.error('Error fetching autocomplete suggestions:', error);
         setPredictions([]);
         setShowDropdown(false);
       }
-    } catch (error) {
-      console.error('Error fetching autocomplete suggestions:', error);
-      setPredictions([]);
-      setShowDropdown(false);
-    }
+    }, 300);
+
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [inputValue]);
+
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
   };
 
   const handleSelectPrediction = async (placeId: string, description: string) => {

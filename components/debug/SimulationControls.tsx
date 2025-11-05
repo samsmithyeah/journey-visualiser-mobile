@@ -16,7 +16,7 @@ export default function SimulationControls({
   isSimulating,
   onSimulate,
 }: SimulationControlsProps) {
-  const isDisabled = !origin || !destination || isSimulating;
+  const isDisabled = !origin || !destination;
 
   return (
     <View>
